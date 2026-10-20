@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>司法知識測試挑戰</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 16px;
+    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    background: #f0f4f8;
+    color: #253247;
+}
+
+#game-container {
+    max-width: 760px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.09);
+}
+
+h1 {
+    text-align: center;
+    color: #28527a;
+    font-size: 25px;
+    margin-top: 4px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #65758b;
+    margin-bottom: 22px;
+}
+
+#info-panel {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: #edf4fa;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 14px;
+    font-weight: bold;
+}
+
+#quiz-area {
+    min-height: 64px;
+    padding: 16px;
+    border-radius: 12px;
+    background: #fff7df;
+    color: #674c16;
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 1.6;
+    margin-bottom: 14px;
+}
+
+#game-field {
+    position: relative;
+    height: 360px;
+    overflow: hidden;
+    border: 2px solid #d8e3ed;
+    border-radius: 14px;
+    background: linear-gradient(#fbfdff, #edf5fc);
+}
+
+.falling-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-width: 82px;
+    max-width: 46%;
+    padding: 10px 14px;
+    border: 2px solid #7fa7ca;
+    border-radius: 12px;
+    background: white;
+    color: #28527a;
+    font-size: 17px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 3px 8px rgba(0,0,0,.08);
+    touch-action: manipulation;
+}
+
+.falling-text:hover {
+    background: #dceeff;
+}
+
+.falling-text:focus-visible {
+    outline: 3px solid #28527a;
+}
+
+.btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin-top: 14px;
+    border: 0;
+    border-radius: 12px;
+    background: #28527a;
+    color: white;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #1b3e60;
+}
+
+.btn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+#survey-area {
+    display: grid;
+    gap: 14px;
+}
+
+#survey-area label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+#survey-area input,
+#survey-area select {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #c8d4e0;
+    border-radius: 8px;
+    font-size: 16px;
+    background: white;
+}
+
+#stats-area {
+    display: none;
+    text-align: center;
+    padding: 18px 6px;
+    line-height: 1.9;
+}
+
+#stats-area h2 {
+    color: #28527a;
+}
+
+#stats-area p {
+    font-size: 17px;
+}
+
+#game-area {
+    display: none;
+}
+
+.hint {
+    color: #65758b;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+#message-area {
+    min-height: 28px;
+    text-align: center;
+    font-weight: bold;
+    padding-top: 8px;
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 8px;
+    }
+
+    #game-container {
+        padding: 13px;
+    }
+
+    h1 {
+        font-size: 21px;
+    }
+
+    #game-field {
+        height: 330px;
+    }
+
+    #quiz-area {
+        font-size: 16px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="game-container">
+
+    <h1>⚖️ 司法知識測驗挑戰</h1>
+    <p class="subtitle">看清題目，點選正確答案！</p>
+
+    <!-- 玩家資料表單 -->
+    <div id="overlay-screen">
+
+        <div id="survey-area">
+
+            <div>
+                <label for="p-name">暱稱</label>
+                <input id="p-name" type="text"
+                       placeholder="請輸入暱稱">
+            </div>
+
+            <div>
+                <label for="p-age">年齡</label>
+                <select id="p-age">
+                    <option value="">請選擇</option>
+                    <option value="18歲以下">18歲以下</option>
+                    <option value="18–29歲">18–29歲</option>
+                    <option value="30–39歲">30–39歲</option>
+                    <option value="40–49歲">40–49歲</option>
+                    <option value="50歲以上">50歲以上</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="p-edu">最高學歷</label>
+                <select id="p-edu">
+                    <option value="">請選擇</option>
+                    <option value="國中以下">國中以下</option>
+                    <option value="高中職">高中職</option>
+                    <option value="專科">專科</option>
+                    <option value="大學">大學</option>
+                    <option value="研究所以上">研究所以上</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="p-job">職業</label>
+                <select id="p-job">
+                    <option value="">請選擇</option>
+                    <option value="學生">學生</option>
+                    <option value="公務人員">公務人員</option>
+                    <option value="軍警消">軍警消</option>
+                    <option value="服務業">服務業</option>
+                    <option value="工商業">工商業</option>
+                    <option value="教育業">教育業</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+
+
+            <p class="hint">
+                填寫資料後即可開始挑戰。暱稱未填時，將使用「現場挑戰者」。
+            </p>
+
+        </div>
+
+        <button class="btn" id="start-btn" type="button">
+            進入挑戰
+        </button>
+
+    </div>
+
+    <!-- 遊戲區 -->
+    <div id="game-area">
+
+        <div id="info-panel">
+            <span>分數：<span id="score">0</span></span>
+            <span>生命：<span id="lives">❤️❤️❤️</span></span>
+            <span>題數：<span id="progress">1 / 5</span></span>
+        </div>
+
+        <div id="quiz-area">題目載入中……</div>
+
+        <div id="game-field" aria-label="答案選擇區"></div>
+
+        <div id="message-area" aria-live="polite"></div>
+
+        <p class="hint">
+            點選掉落的答案。答對可得分；答錯或答案全部掉落，會扣除一次生命。
+        </p>
+
+    </div>
+
+    <!-- 結束統計 -->
+    <div id="stats-area">
+        <h2 id="result-title">挑戰結束！</h2>
+        <p id="res-name"></p>
+        <p>最終分數：<strong id="stat-score">0</strong></p>
+        <p>答對題數：<strong id="stat-correct">0</strong></p>
+        <p>答錯次數：<strong id="stat-wrong">0</strong></p>
+        <p id="result-message"></p>
+
+        <button class="btn" id="restart-btn" type="button">
+            再玩一次
+        </button>
+    </div>
+
+</div>
+
+<script>
+"use strict";
+
+// 題庫
+const quizBank = [
+    {
+        q: "我們法院的名字是？",
+        a: "臺中高等行政法院",
+        options: ["臺中地方法院", "台灣高等法院", "臺中高等行政法院", "臺中行政執行處"]
+    },
+    {
+        q: "行政法院業務項目？",
+        a: "行政訴訟",
+        options: ["民事", "刑事", "家事", "行政訴訟"]
+    },
+    {
+        q: "臺中高等行政法院有幾個審級？",
+        a: "2個",
+        options: ["2個", "1個", "4個", "3個"]
+    },
+    {
+        q: "對行政訴訟程序有疑問要找哪一科詢問？",
+        a: "訴訟輔導科",
+        options: ["研考科", "訴訟輔導科", "法警", "總務科"]
+    },
+    {
+        q: "對交通裁決不服要打什麼訴訟程序？",
+        a: "行政",
+        options: ["民事", "刑事", "行政", "民事執行"]
+    },
+    {
+        q: "收到交通裁決書幾天內要起訴？",
+        a: "30天",
+        options: ["60天", "30天", "15天", "20天"]
+    },
+  {
+        q: "高小政可以在下列哪些行政法院提起交通裁決起訴?(複選)",
+        a: ["臺中", "臺北"],
+        options: ["臺北", "高雄", "臺中", "最高"]
+    },
+  {
+        q: "交通裁決事件的起訴裁判費多少？",
+        a: "300元",
+        options: ["1000元", "1200元", "300元", "2000元"]
+    },
+  {
+        q: "高小政的交通裁決事件不能找誰當訴訟代理人？",
+        a: "朋友",
+        options: ["律師", "爸爸", "媽媽", "朋友"]
+    },
+  {
+        q: "收到『可上訴』的交通裁決判決書，幾天內要提上訴？",
+        a: "20天",
+        options: ["10天", "20天", "15天", "5天"]
+    },
+];
+
+// 遊戲狀態
+let currentQuestionIndex = 0;
+let score = 0;
+let lives = 3;
+let countCorrect = 0;
+let countWrong = 0;
+
+let activeWords = [];
+let gameInterval = null;
+let lastFrameTime = 0;
+let questionLocked = false;
+let playerData = {};
+
+const $ = id => document.getElementById(id);
+
+const overlay = $("overlay-screen");
+const gameArea = $("game-area");
+const statsArea = $("stats-area");
+const gameField = $("game-field");
+
+// 開始按鈕
+$("start-btn").addEventListener("click", startGame);
+
+// 重玩按鈕
+$("restart-btn").addEventListener("click", () => {
+    statsArea.style.display = "none";
+    overlay.style.display = "block";
+});
+let playerRecordId = "";
+let answerRecords = [];
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQYOoXtZcDZwZ7vwKf3P941xPZZRmeX4_FMkIscv_K5QPOzNooKJ6gEVMONZsHybInNA/exec";
+
+function sendSurveyData(data) {
+ const formData = new URLSearchParams();
+
+    Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value ?? "");
+    });
+
+    fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: formData
+    }).catch(error => {
+        console.error("資料傳送失敗：", error);
+    });
+}
+
+// 開始遊戲
+function startGame() {
+    
+playerRecordId = "P" + Date.now() + "-" +
+    Math.random().toString(36).slice(2, 8);
+
+answerRecords = [];
+
+playerData = {
+    name: $("p-name").value.trim() || "現場挑戰者",
+    age: $("p-age").value,
+    education: $("p-edu").value,
+    job: $("p-job").value,
+    lawyer: $("p-lawyer") ? $("p-lawyer").value : ""
+};
+
+sendSurveyData({
+    ...playerData,
+    action: "start",
+    recordId: playerRecordId
+});
+
+  
+    currentQuestionIndex = 0;
+    score = 0;
+    lives = 3;
+    countCorrect = 0;
+    countWrong = 0;
+    questionLocked = false;
+selectedAnswers = [];
+  
+    stopGameLoop();
+    clearAllWords();
+
+    $("score").textContent = score;
+    $("lives").textContent = "❤️❤️❤️";
+    $("message-area").textContent = "";
+
+    overlay.style.display = "none";
+    statsArea.style.display = "none";
+    gameArea.style.display = "block";
+
+    loadQuestion();
+    startGameLoop();
+}
+
+// 載入題目
+  let selectedAnswers = [];
+function loadQuestion() {
+    if (lives <= 0) {
+        endGame(false);
+        return;
+    }
+
+    if (currentQuestionIndex >= quizBank.length) {
+        endGame(true);
+        return;
+    }
+
+    questionLocked = false;
+
+    const question = quizBank[currentQuestionIndex];
+
+    $("quiz-area").textContent =
+        "【第 " + (currentQuestionIndex + 1) +
+        " 題】" + question.q;
+
+    $("progress").textContent =
+        (currentQuestionIndex + 1) + " / " + quizBank.length;
+
+    $("message-area").textContent = "";
+
+    clearAllWords();
+    spawnOptions(question);
+}
+
+// 產生答案選項
+function spawnOptions(question) {
+    clearAllWords();
+
+    const fieldWidth = gameField.clientWidth;
+    const fieldHeight = gameField.clientHeight;
+
+    const count = question.options.length;
+    const itemWidth = Math.min(130, fieldWidth / count - 8);
+    const gap = fieldWidth / count;
+
+    question.options.forEach((answer, index) => {
+        const el = document.createElement("button");
+
+        el.type = "button";
+        el.className = "falling-text";
+        el.textContent = answer;
+        el.style.width = itemWidth + "px";
+        el.style.left =
+            Math.max(0, index * gap + (gap - itemWidth) / 2) + "px";
+        el.style.top = (-index * 48) + "px";
+
+        const word = {
+            element: el,
+            answer: answer,
+            y: -index * 48,
+            speed: 30 + Math.random() * 25,
+            removed: false
+        };
+
+        el.addEventListener("click", () => chooseAnswer(word));
+
+        gameField.appendChild(el);
+        activeWords.push(word);
+    });
+}
+
+// 玩家選擇答案
+
+function chooseAnswer(word) {
+    if (questionLocked || word.removed) return;
+
+    const question = quizBank[currentQuestionIndex];
+
+    const correctAnswers = Array.isArray(question.a)
+        ? question.a
+        : [question.a];
+
+    // 建立這一題的紀錄
+    let currentRecord = answerRecords.find(
+        record => record.questionIndex === currentQuestionIndex
+    );
+
+    if (!currentRecord) {
+        currentRecord = {
+            questionIndex: currentQuestionIndex,
+            question: question.q,
+            correctAnswers: [...correctAnswers],
+            selectedAnswers: [],
+            wrongAnswers: [],
+            result: "作答中"
+        };
+
+        answerRecords.push(currentRecord);
+    }
+
+    // 判斷答案
+    if (correctAnswers.includes(word.answer)) {
+
+        if (selectedAnswers.includes(word.answer)) return;
+
+        selectedAnswers.push(word.answer);
+        currentRecord.selectedAnswers.push(word.answer);
+
+        removeWord(word);
+
+        // 所有正確答案都選完才算答對
+        if (correctAnswers.every(
+            answer => selectedAnswers.includes(answer)
+        )) {
+            questionLocked = true;
+            score += 10;
+            countCorrect++;
+
+            currentRecord.result = "答對";
+
+            $("score").textContent = score;
+            $("message-area").textContent = "答對了！ +10 分";
+
+            clearAllWords();
+            currentQuestionIndex++;
+
+            window.setTimeout(() => {
+                if (lives > 0) loadQuestion();
+            }, 550);
+
+        } else {
+            $("message-area").textContent =
+                "已選到正確答案！請繼續選擇其他正確答案。";
+
+            if (activeWords.length === 0) {
+                window.setTimeout(() => {
+                    if (!questionLocked && lives > 0) {
+                        spawnOptions(question);
+                    }
+                }, 350);
+            }
+        }
+
+    } else {
+        currentRecord.wrongAnswers.push(word.answer);
+
+        countWrong++;
+        lives--;
+
+        $("message-area").textContent = "答錯了，再接再厲！";
+        updateLives();
+
+        removeWord(word);
+
+        if (lives <= 0) {
+            currentRecord.result = "未完成";
+            endGame(false);
+            return;
+        }
+
+        if (activeWords.length === 0) {
+            window.setTimeout(() => {
+                if (!questionLocked && lives > 0) {
+                    spawnOptions(question);
+                }
+            }, 350);
+        }
+    }
+}
+
+
+// 移除單一答案
+function removeWord(word) {
+    if (!word || word.removed) return;
+
+    word.removed = true;
+    word.element.remove();
+
+    activeWords = activeWords.filter(item => item !== word);
+}
+
+// 清除所有答案
+function clearAllWords() {
+    activeWords.forEach(word => {
+        word.removed = true;
+        word.element.remove();
+    });
+
+    activeWords = [];
+}
+
+// 更新生命值顯示
+function updateLives() {
+    $("lives").textContent =
+        "❤️".repeat(Math.max(0, lives)) +
+        "🤍".repeat(Math.max(0, 3 - lives));
+}
+
+// 遊戲動畫迴圈
+function startGameLoop() {
+    stopGameLoop();
+
+    lastFrameTime = 0;
+
+    gameInterval = window.requestAnimationFrame(updateGame);
+}
+
+// 更新掉落位置
+
+function updateGame(timestamp) {
+    if (lives <= 0 || gameArea.style.display === "none") {
+        stopGameLoop();
+        return;
+    }
+
+    if (!lastFrameTime) lastFrameTime = timestamp;
+
+    const delta = Math.min((timestamp - lastFrameTime) / 1000, 0.05);
+    lastFrameTime = timestamp;
+
+    let missedAnswer = false;
+
+    activeWords.slice().forEach(word => {
+        if (word.removed || questionLocked) return;
+
+        word.y += word.speed * delta;
+        word.element.style.top = word.y + "px";
+
+        if (word.y > gameField.clientHeight) {
+            removeWord(word);
+            missedAnswer = true;
+        }
+    });
+
+    if (missedAnswer && activeWords.length === 0 && !questionLocked) {
+        const question = quizBank[currentQuestionIndex];
+
+        let currentRecord = answerRecords.find(
+            record => record.questionIndex === currentQuestionIndex
+        );
+
+        if (!currentRecord) {
+            currentRecord = {
+                questionIndex: currentQuestionIndex,
+                question: question.q,
+                correctAnswers: Array.isArray(question.a)
+                    ? [...question.a]
+                    : [question.a],
+                selectedAnswers: [],
+                wrongAnswers: [],
+                result: "作答中"
+            };
+
+            answerRecords.push(currentRecord);
+        }
+
+        currentRecord.missed = true;
+
+        countWrong++;
+        lives--;
+
+        updateLives();
+
+        if (lives <= 0) {
+            currentRecord.result = "未完成";
+            endGame(false);
+            return;
+        }
+
+        $("message-area").textContent = "答案都掉下去了，請再試一次！";
+
+        window.setTimeout(() => {
+            if (!questionLocked && lives > 0 &&
+                currentQuestionIndex < quizBank.length) {
+                spawnOptions(question);
+            }
+        }, 500);
+    }
+
+    gameInterval = window.requestAnimationFrame(updateGame);
+}
+
+// 停止動畫
+function stopGameLoop() {
+    if (gameInterval !== null) {
+        window.cancelAnimationFrame(gameInterval);
+        gameInterval = null;
+    }
+}
+
+// 結束遊戲
+function endGame(completed) {
+    stopGameLoop();
+    clearAllWords();
+
+    gameArea.style.display = "none";
+    statsArea.style.display = "block";
+
+    $("result-title").textContent =
+        completed ? "🎉 恭喜完成挑戰！" : "挑戰結束！";
+
+    $("res-name").textContent =
+        "挑戰者：" + playerData.name;
+
+    $("stat-score").textContent = score;
+    $("stat-correct").textContent = countCorrect;
+    $("stat-wrong").textContent = countWrong;
+
+    $("result-message").textContent = completed
+        ? "你已完成全部題目，感謝參與！"
+        : "別氣餒，再挑戰一次就會更熟悉！";
+  
+    // 將遊戲結果傳回同一位玩家的資料列
+    sendSurveyData({
+        action: "finish",
+        recordId: playerRecordId,
+        answerRecords: JSON.stringify(answerRecords),
+        score: String(score),
+        correct: String(countCorrect),
+        wrong: String(countWrong),
+        completed: completed ? "是" : "否"
+    });
+
+}
+</script>
+
+</body>
+</html>
