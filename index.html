@@ -275,7 +275,7 @@ h1 {
 
         <div id="info-panel">
             <span>分數：<span id="score">0</span></span>
-            <span>生命：<span id="lives">❤️❤️❤️</span></span>
+            <span>生命：<span id="lives">❤️❤️❤️❤️❤️</span></span>
             <span>題數：<span id="progress">1 / 5</span></span>
         </div>
 
@@ -334,7 +334,7 @@ const quizBank = [
     },
     {
         q: "對交通裁決不服，要打什麼訴訟？",
-        a: "行政",
+        a: "行政訴訟",
         options: ["民事", "刑事", "行政訴訟", "民事執行"]
     },
     {
@@ -367,7 +367,7 @@ const quizBank = [
 // 遊戲狀態
 let currentQuestionIndex = 0;
 let score = 0;
-let lives = 3;
+let lives = 5;
 let countCorrect = 0;
 let countWrong = 0;
 
@@ -437,7 +437,7 @@ sendSurveyData({
   
     currentQuestionIndex = 0;
     score = 0;
-    lives = 3;
+    lives = 5;
     countCorrect = 0;
     countWrong = 0;
     questionLocked = false;
@@ -447,7 +447,7 @@ selectedAnswers = [];
     clearAllWords();
 
     $("score").textContent = score;
-    $("lives").textContent = "❤️❤️❤️";
+    $("lives").textContent = "❤️❤️❤️❤️❤️";
     $("message-area").textContent = "";
 
     overlay.style.display = "none";
@@ -649,7 +649,7 @@ function clearAllWords() {
 function updateLives() {
     $("lives").textContent =
         "❤️".repeat(Math.max(0, lives)) +
-        "🤍".repeat(Math.max(0, 3 - lives));
+        "🤍".repeat(Math.max(0, 5 - lives));
 }
 
 // 遊戲動畫迴圈
